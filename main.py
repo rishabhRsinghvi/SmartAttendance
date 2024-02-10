@@ -3,6 +3,23 @@ import time
 import requests
 import base64
 
+# Function to check if webcam is accessible
+def is_webcam_available():
+    try:
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            return False
+        cap.release()
+        return True
+    except:
+        return False
+
+# Check if webcam is available
+if not is_webcam_available():
+    print("Error: Webcam is currently in use by another application.")
+    print("Please close any other applications that are using the webcam and try again.")
+    exit()
+
 face_classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 def face_extractor(img):
@@ -22,11 +39,13 @@ def face_extractor(img):
 
 cap = cv2.VideoCapture(0)
 count = 0
+
 name = input("Enter Name:")
 # GitHub repository information
+class_user_id = input("Enter Class User ID:")  # Prompt user for Class User ID
 repo_owner = "rishabhRsinghvi"
 repo_name = "SmartAttendance"
-file_path = "Images"
+file_path = f"Images/{class_user_id}"  # Include Class User ID in file path
 
 # Collect 10 samples of the face from the webcam input
 while True:
@@ -50,12 +69,15 @@ while True:
 
         # Upload image to GitHub
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}/{name}_{count}.jpg"
-        headers = {'Authorization': 'token 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'}  # Replace with your GitHub token
+        headers = {'Authorization': 'token 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'}  # Replace with your GitHub token
         data = {
             'message': f'Add image {count} for {name}',
             'content': img_base64
         }
         response = requests.put(url, headers=headers, json=data)
+
+        # Print GitHub API response
+        print(response.json())
 
         time.sleep(1)
 
